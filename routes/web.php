@@ -5,7 +5,8 @@ use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\TwoFactorController;
-
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminController;
 
 Auth::routes();
 
@@ -28,3 +29,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/verify-2fa', [TwoFactorController::class, 'index'])->name('verify.index');
     Route::post('/verify-2fa', [TwoFactorController::class, 'store'])->name('verify.store');
 });
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
+Route::middleware(['auth', 'role:Admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+});
+
+
+

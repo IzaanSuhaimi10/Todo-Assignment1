@@ -58,4 +58,11 @@ public function resetTwoFactorCode()
     $this->two_factor_expires_at = null;
     $this->save();
 }
+
+public function role()
+{
+    return $this->hasOne(UserRole::class, 'user_id', 'id');
+}
+
+
 }

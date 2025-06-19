@@ -112,3 +112,69 @@ This project extends the Laravel To-Do App with robust authentication security i
 - `database/migrations/*_add_salt_to_users_table.php`
 
 ---
+# Laravel To-Do App – Authorization
+
+This final security enhancement implements Role-Based Access Control (RBAC) to restrict access and functionality based on user roles and defined permissions. It ensures users can only access the UI features and routes they’re authorized to use.
+
+---
+
+## 🧑‍💼 Roles and Permissions
+
+Two user roles were introduced:
+
+| Role   | Permissions                        |
+|--------|------------------------------------|
+| Admin  | Create, Retrieve, Update, Delete   |
+| User   | Create, Retrieve                   |
+
+These roles are stored in the `user_roles` table, and their allowed actions are defined in the `role_permissions` table.
+
+---
+
+## 🔐 Features Implemented 
+
+- Created `user_roles` and `role_permissions` migration and model files
+- Used Tinker and Seeder to assign:
+  - `admin@example.com` → Admin
+  - `user@example.com` → User
+- Built `CheckUserRole` middleware to restrict access to role-specific routes (e.g. `/admin`)
+- Restricted To-Do list buttons based on permissions:
+  - ✅ **Create** → Show "Add new todo" button
+  - ✅ **Update** → Show "Edit" button
+  - ✅ **Delete** → Show "Delete" button
+- Role-based UI enforcement in `list.blade.php`
+- Admin has full access, while User has limited access
+- Middleware successfully redirects unauthorized users
+
+---
+
+## 📂 Key Files Modified or Added
+
+- `app/Models/UserRole.php`
+- `app/Models/RolePermission.php`
+- `app/Http/Middleware/CheckUserRole.php`
+- `app/Http/Controllers/AdminController.php`
+- `resources/views/todo/list.blade.php`
+- `database/seeders/RoleAndPermissionSeeder.php`
+- `routes/web.php`
+
+---
+
+## 🧪 Testing Access
+
+### ✅ Admin Login
+- **Email:** `admin@example.com`
+- **Password:** `password`
+- Full access to To-Do list actions and Admin dashboard
+
+### ✅ User Login
+- **Email:** `user@example.com`
+- **Password:** `password`
+- Can only add and view todos (edit and delete hidden)
+
+### 🔐 Route Protection
+- `/admin` is accessible to Admin only
+- Users without sufficient permission are redirected
+
+---
+
