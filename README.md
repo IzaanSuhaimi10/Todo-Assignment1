@@ -1,66 +1,114 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Laravel To-Do App – Input Validation and Profile Page
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project is an enhanced Laravel-based To-Do Application for the Web App Security assignment. It improves user authentication and introduces a complete profile management feature using the MVC pattern.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🔐 Security Enhancements
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### ✅ Register & Login Pages
+- Implemented **Laravel Form Request** validation
+- Restricted name field input using **regex whitelist** (`^[a-zA-Z\s]+$`)
+- Added validation feedback with **Bootstrap alerts**
+- Improved protection against invalid input and script injection
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 👤 User Profile Page
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+New feature at `/profile`:
+- Users can:
+  - Edit **nickname**, **email**, **phone**, **city**, **password**
+  - Upload a profile picture (**avatar**)
+  - **Delete their account** securely
+- Fully protected by `auth` middleware
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🧱 MVC Breakdown
 
-## Laravel Sponsors
+| Component       | Changes Made                                                             |
+|----------------|---------------------------------------------------------------------------|
+| **Model**       | `User.php` now includes `nickname`, `avatar`, `phone`, `city`            |
+| **Views**       | Modified `register`, `login`, and `layouts`; Added `profile/edit.blade.php` |
+| **Controllers** | `RegisterController` & `LoginController` updated; New `ProfileController` created |
+| **Requests**    | New `RegisterRequest`, `LoginRequest`, and `UpdateProfileRequest` added  |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 📂 Key Files Modified or Added
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+- `app/Http/Controllers/Auth/RegisterController.php`
+- `app/Http/Controllers/Auth/LoginController.php`
+- `app/Http/Controllers/ProfileController.php`
+- `app/Http/Requests/RegisterRequest.php`
+- `app/Http/Requests/LoginRequest.php`
+- `app/Http/Requests/UpdateProfileRequest.php`
+- `resources/views/auth/register.blade.php`
+- `resources/views/auth/login.blade.php`
+- `resources/views/layouts/app.blade.php`
+- `resources/views/profile/edit.blade.php`
+- `routes/web.php`
+- `database/migrations/*_add_profile_fields_to_users_table.php`
 
-## Contributing
+---
+# Laravel To-Do App – Authentication Enhancements
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+This project extends the Laravel To-Do App with robust authentication security improvements as part of the Web App Security assignment. The enhancements include Multi-Factor Authentication (MFA), password salting, secure password hashing, and login rate limiting using Laravel Fortify and RateLimiter.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🔐 Authentication Enhancements Overview
 
-## Security Vulnerabilities
+### ✅ Multi-Factor Authentication (MFA)
+- Integrated **Laravel Fortify** for 2FA setup
+- Verification code sent via email using a custom Mailable
+- 2FA code expires after 10 minutes and regenerates securely
+- Protects access by requiring a valid 6-digit code after login
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 🔒 Password Salting
+- Added a `salt` field to the `users` table
+- During registration, each user is assigned a unique 16-character salt
+- Password is hashed using: `Hash::make(password + salt)`
+- On login, validation uses: `Hash::check(input + salt, stored_hash)`
 
-## License
+### 🧂 Strong Hashing Algorithm
+- Utilized **bcrypt** (Laravel's default hashing driver)
+- No config change needed; compatible with Laravel’s `Hash::make()`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 🛡️ Rate Limiting
+- Used Laravel’s built-in **RateLimiter** class
+- Limited login attempts to **3 per minute**
+- Applied per email and IP combination
+- Displays remaining seconds until user can retry
+
+---
+
+## 🧱 MVC Breakdown
+
+| Component    | Changes Made |
+|--------------|--------------|
+| **Model**    | `User.php` includes `salt` column and 2FA helper methods |
+| **Views**    | `login.blade.php`, `register.blade.php`, `verify-2fa.blade.php` created or updated |
+| **Controllers** | `LoginController` modified to handle salt + rate limit + MFA |
+| **Mailables**  | New `TwoFactorCodeMail` class created |
+| **Migration**  | Added `salt` column to `users` table |
+| **Service Providers** | `FortifyServiceProvider` configured for 2FA + RateLimiter |
+
+---
+
+## 📂 Key Files Modified or Added
+
+- `app/Http/Controllers/Auth/LoginController.php`
+- `app/Http/Controllers/Auth/RegisterController.php`
+- `app/Http/Controllers/Auth/TwoFactorController.php`
+- `app/Mail/TwoFactorCodeMail.php`
+- `app/Models/User.php`
+- `app/Providers/FortifyServiceProvider.php`
+- `resources/views/auth/login.blade.php`
+- `resources/views/auth/register.blade.php`
+- `resources/views/auth/verify-2fa.blade.php`
+- `routes/web.php`
+- `database/migrations/*_add_salt_to_users_table.php`
+
+---
