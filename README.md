@@ -178,3 +178,96 @@ These roles are stored in the `user_roles` table, and their allowed actions are 
 
 ---
 
+## 🛡️ Laravel To-Do App – CSP, CSRF & XSS Defenses
+
+This final enhancement secures the application against common web vulnerabilities: Cross-Site Request Forgery (CSRF), Cross-Site Scripting (XSS), and improper resource loading through Content Security Policy (CSP).
+
+---
+
+## 🧷 CSRF (Cross-Site Request Forgery) Protection
+
+Laravel provides built-in CSRF protection through middleware and Blade directives.
+
+### ✅ Implemented Features:
+- All forms use the `@csrf` directive to include a CSRF token.
+- The token is automatically validated via Laravel’s middleware.
+- AJAX-ready token meta tag added in layout.
+
+### 🔍 Code Example:
+```blade
+<form method="POST" action="{{ route('login') }}">
+    @csrf
+    <!-- form inputs -->
+</form>
+```
+
+```blade
+<meta name="csrf-token" content="{{ csrf_token() }}">
+```
+
+```php
+// app/Http/Kernel.php
+\App\Http\Middleware\VerifyCsrfToken::class,
+```
+
+---
+
+## 🛡️ XSS (Cross-Site Scripting) Protection
+
+Blade templates escape all output by default using `{{ }}` to prevent script injection.
+
+### ✅ Implemented Features:
+- All dynamic data is displayed using escaped Blade syntax.
+- No unescaped `{!! !!}` is used anywhere in user-facing templates.
+- Input can be sanitized manually using `strip_tags()` for extra safety.
+
+### 🔍 Code Example:
+```blade
+<li>{{ $error }}</li> <!-- Safe from script injection -->
+```
+
+```php
+// Manual sanitization
+$todo->description = strip_tags($request->description);
+```
+
+---
+
+## 🔐 CSP (Content Security Policy)
+
+To mitigate XSS and other injection attacks, a strict CSP is enforced using the **Spatie Laravel CSP** package.
+
+### ✅ Implemented Features:
+- Only allows scripts, styles, and images from `self` and safe sources.
+- Custom middleware `AddCspHeaders` created to enforce policies.
+
+### 🔍 Code Example:
+```php
+// app/Http/Middleware/AddCspHeaders.php
+$this->addPolicy()
+    ->addDirective(Directive::SCRIPT_SRC, [Keyword::SELF])
+    ->addDirective(Directive::STYLE_SRC, [Keyword::SELF])
+    ->addDirective(Directive::IMG_SRC, [Keyword::SELF, 'data:']);
+```
+
+```php
+// app/Http/Kernel.php
+\App\Http\Middleware\AddCspHeaders::class,
+```
+
+### 🧪 Example Response Header:
+```
+Content-Security-Policy: script-src 'self'; style-src 'self'; img-src 'self' data:;
+```
+
+---
+
+## ✅ Summary of Final Security Layers
+
+| Threat         | Defense Implemented        | Laravel Mechanism                        |
+|----------------|-----------------------------|------------------------------------------|
+| CSRF           | `@csrf` tokens + middleware | `VerifyCsrfToken`, Blade directive       |
+| XSS            | Output escaping             | Blade’s `{{ }}` auto-escaping            |
+| CSP            | Resource whitelisting       | Spatie CSP middleware + custom policy    |
+
+These layered defenses work together to ensure your Laravel application is secure against common frontend attacks.
