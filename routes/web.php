@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-
+use App\Http\Controllers\Auth\TwoFactorController;
 
 
 Auth::routes();
@@ -23,4 +23,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/verify-2fa', [TwoFactorController::class, 'index'])->name('verify.index');
+    Route::post('/verify-2fa', [TwoFactorController::class, 'store'])->name('verify.store');
 });

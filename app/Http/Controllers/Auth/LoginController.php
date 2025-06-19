@@ -6,6 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Mail\TwoFactorCodeMail;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Hash;
+
+
 
 
 class LoginController extends Controller
@@ -42,16 +50,37 @@ class LoginController extends Controller
     }
 
     public function login(LoginRequest $request)
-    {
-        $credentials = $request->only('email', 'password');
+{
+    $email = (string) $request->input('email');
+    $ip = $request->ip();
+    $throttleKey = Str::lower($email) . '|' . $ip;
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended($this->redirectTo);
-        }
-
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+    // Rate limiting
+    if (RateLimiter::tooManyAttempts($throttleKey, 3)) {
+        throw ValidationException::withMessages([
+            'email' => ['Too many login attempts. Please try again in ' . RateLimiter::availableIn($throttleKey) . ' seconds.'],
         ]);
     }
+
+    $user = \App\Models\User::where('email', $email)->first();
+
+    if ($user && Hash::check($request->password . $user->salt, $user->password)) {
+        Auth::login($user);
+        RateLimiter::clear($throttleKey);
+        $request->session()->regenerate();
+
+        // Two-factor auth (if used)
+        $user->generateTwoFactorCode();
+        \Mail::to($user->email)->send(new \App\Mail\TwoFactorCodeMail($user));
+
+        return redirect()->route('verify.index');
+    }
+
+    RateLimiter::hit($throttleKey, 60);
+
+    return back()->withErrors([
+        'email' => 'The provided credentials do not match our records.',
+    ]);
+}
+
 }

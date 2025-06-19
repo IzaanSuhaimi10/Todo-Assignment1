@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -21,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'salt',
     ];
 
     /**
@@ -42,4 +44,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function generateTwoFactorCode()
+{
+    $this->two_factor_code = rand(100000, 999999);
+    $this->two_factor_expires_at = Carbon::now()->addMinutes(10);
+    $this->save();
+}
+
+public function resetTwoFactorCode()
+{
+    $this->two_factor_code = null;
+    $this->two_factor_expires_at = null;
+    $this->save();
+}
 }
